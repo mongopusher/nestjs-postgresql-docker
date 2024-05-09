@@ -1,0 +1,39 @@
+services:
+  nest:
+    container_name: nest_container
+    build:
+      target: development
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./package.json
+    command: npm run start:dev
+    ports:
+      - "80:${NEST_PORT}"
+    depends_on:
+      - db
+    links:
+      - db
+    restart: always
+
+  db:
+    container_name: postgres_container
+    image: bitnami/postgresql:latest
+    restart: always
+    environment:
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    expose:
+      - ${POSTGRES_PORT}
+
+volumes:
+  pgdata:
